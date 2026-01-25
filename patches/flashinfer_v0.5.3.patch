@@ -1,0 +1,7 @@
+diff --git a/third_party/flashinfer b/third_party/flashinfer
+index c8d76d3..0e68a2f 160000
+--- a/third_party/flashinfer
++++ b/third_party/flashinfer
+@@ -1 +1 @@
+-Subproject commit c8d76d3a3afcfbf2830f2697236c22e9d79610f8
++Subproject commit 0e68a2febc58df99429f652769c5c485ca67fc39-dirty
