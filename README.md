@@ -12,7 +12,7 @@ This is the code repo for implementing paper **HARD-KV: Head-Adaptive Regulariza
 
 - Full Inference Engien Integration: supporting engine-level features continuous batching and CUDA Graph, bringing KV cache in to system-level design. 
 
-For further details, please refer to [architecture.md](architecture.md)
+For further details, please refer to [docs/architecture.md](docs/architecture.md)
 
 ![framework](assets/frame_all.drawio.png)
 ## Quick Start 
@@ -72,3 +72,7 @@ Feel free to try with different models and methods, or even contribute custome v
 | | **+ Ours** | **15.5%** | **27705.7** | **46.2%** | **22499.4** | **49.4%** | **14520.4** |
 | RKV | Base | 28.1% | 19625.3 | 35.1% | 17915.2 | 39.9% | 27429.7 |
 | | **+ Ours** | **24.1%** | **24346.1** | **52.0%** | **24748.5** | **50.3%** | **21296.5** |
+
+## Visualiation Guides
+
+see [docs/viz/visualize_guides.md](docs/viz/visualize_guides.md)
