@@ -4,8 +4,8 @@ import torch.nn.functional as F
 
 from .utils import compute_attention_scores, update_log, gather_selected_kv
 from .lse_preserve_merge import merge_fixed_budget
-from src.services.nanovllm_v8.utils.logging import append_item_to_log
-from .binary_search import binary_search_T, gradient_descent_T
+from src.services.nanovllm_HARD.utils.logging import append_item_to_log
+from .search import binary_search_T, gradient_descent_T
 
 from flashinfer.sampling import top_p_renorm_probs
 from flashinfer.quantization import segment_packbits
@@ -72,6 +72,7 @@ class VanillaToppKV:
                 effective_mask = indices < lengths.to(indices.device)
 
                 attn_weights = attn_weights.masked_fill(~effective_mask.unsqueeze(2), float("-inf"))
+                
             if effective_mask is not None:
                 effective_mask = effective_mask.unsqueeze(0).unsqueeze(2).to(key_states.device)
                 attn_weights = attn_weights.masked_fill(~effective_mask, float("-inf"))

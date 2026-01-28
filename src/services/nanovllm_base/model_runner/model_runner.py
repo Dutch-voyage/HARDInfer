@@ -25,6 +25,7 @@ from src.artifacts.nanovllm_base.cache_mngr.layerwise import CacheManager
 
 from src.artifacts.nanovllm_base.cache_mngr.snapKV import SnapKV
 from src.artifacts.nanovllm_base.cache_mngr.vanilla import VanillaKV
+# from src.artifacts.nanovllm_v5.cache_mngr.snapKV_topp import SnapKV
 from src.artifacts.nanovllm_base.cache_mngr.RKV import RKV
 from src.services.nanovllm_base.model_runner.models.qwen3 import Qwen3AttentionArtifacts
 
@@ -206,9 +207,6 @@ class ModelRunner(BaseService):
         if self.config.if_fake_compress:
             return 
         
-        for seq in self.cu_seqs:    
-            self.update_blocks_post_compression(seq, self.config.layer_budget)
-
     def save_compress_distribution(self, steps):
         save_path = os.path.join(self.config.log_path, f"compress_distribution_{steps}.pt")
         if not os.path.exists(self.config.log_path):

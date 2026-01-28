@@ -21,7 +21,7 @@ import dataclasses
 
 from src.services.nanovllm_HARD.utils.context import get_cuda_graph_flag
 
-from src.artifacts.nanovllm_HARD.attention.flashinfer_attention_headflatten import Attention
+from artifacts.nanovllm_HARD.attention.flashinfer_attention import Attention
 
 
 @dataclasses.dataclass

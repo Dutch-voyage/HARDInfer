@@ -10,7 +10,7 @@ class Config:
     max_num_batched_tokens: int = 262144
     max_num_seqs: int = 64
     max_model_len: int = 32768
-    gpu_memory_utilization: float = 0.85
+    gpu_memory_utilization: float = 0.80
     tensor_parallel_size: int = 1
     enforce_eager: bool = False
     hf_config: AutoConfig | None = None
@@ -22,7 +22,7 @@ class Config:
     lower_bound_budget: int = 128
     num_kvcache_blocks: int = -1
     
-    compress_method: str = "oMerge"
+    compress_method: str = "snpkv"
     
     if_compress_kvcache: bool = False
     if_fake_compress: bool = False

@@ -29,11 +29,12 @@ class BlockManager(BaseService):
     def name(self):
         return "BlockManager"
 
-    def __init__(self, num_blocks: int, block_size: int, num_kv_heads: int):
+    def __init__(self, num_blocks: int, block_size: int, num_kv_heads: int, if_fake_compress=True, *args, **kwargs):
         super().__init__()
         assert num_blocks > 0
         self.block_size = block_size
         self.num_kv_heads = num_kv_heads
+        self.if_fake_compress = if_fake_compress
         self.blocks: list[Block] = [Block(i) for i in range(num_blocks)]
         self.free_block_ids: deque[int] = deque(range(num_blocks))
         # during the engine running, some block will be released head by head, when all heads are released, the block can be reused
@@ -56,7 +57,7 @@ class BlockManager(BaseService):
         
         # NOTE need further design
         
-        seq.headwise_mask_layer_transpose = seq.headwise_mask_layer_transpose[..., :(seq.num_blocks_max_heads + 7) // 8]
+        seq.headwise_mask_layer = seq.headwise_mask_layer[..., :(seq.num_blocks_max_heads + 7) // 8]
     def can_allocate(self, seq: Sequence) -> bool:
         return len(self.free_block_ids) >= seq.num_blocks_max_heads
 
@@ -70,10 +71,10 @@ class BlockManager(BaseService):
             seq.block_table.append(block_id)
             seq.block_id_to_count[block_id] = 0
             if i % 8 == 0 and i != 0:
-                seq.headwise_mask_layer_transpose = torch.cat(
-                    [seq.headwise_mask_layer_transpose, torch.zeros((Sequence.num_layers, Sequence.num_kv_heads, 1), device="cuda", dtype=torch.uint8)], dim=2
+                seq.headwise_mask_layer = torch.cat(
+                    [seq.headwise_mask_layer, torch.zeros((Sequence.num_layers, Sequence.num_kv_heads, 1), device="cuda", dtype=torch.uint8)], dim=2
                 )
-            seq.headwise_mask_layer_transpose[:, :, i // 8] += seq.next_mask
+            seq.headwise_mask_layer[:, :, i // 8] += seq.next_mask.to(seq.headwise_mask_layer.device)
             seq.next_mask = torch_rotl_uint8(seq.next_mask, 1)
             
     def deallocate(self, seq: Sequence):
@@ -94,13 +95,13 @@ class BlockManager(BaseService):
         seq.block_table.append(block_id)
         seq.block_id_to_count[block_id] = 0
         # there must be at least one token after prefilling (allocate)
-        if (seq.num_blocks_max_heads - 1) // 8 >= seq.headwise_mask_layer_transpose.shape[2]:
-            seq.headwise_mask_layer_transpose = torch.cat(
-                [seq.headwise_mask_layer_transpose, torch.zeros((Sequence.num_layers, Sequence.num_kv_heads, 1), device="cuda", dtype=torch.uint8)], dim=2
+        if (seq.num_blocks_max_heads - 1) // 8 >= seq.headwise_mask_layer.shape[2]:
+            seq.headwise_mask_layer = torch.cat(
+                [seq.headwise_mask_layer, torch.zeros((Sequence.num_layers, Sequence.num_kv_heads, 1), device="cuda", dtype=torch.uint8)], dim=2
             )
-        # print(seq.headwise_mask_layer_transpose[0])
-        # seq.headwise_mask_layer_transpose[:, torch.arange(0, self.num_kv_heads), (seq.num_blocks_head - 1) // 8] += seq.next_mask
-        # print(seq.headwise_mask_layer_transpose[0])
-        # print('-' * 100)
-        seq.headwise_mask_layer_transpose[:, torch.arange(0, self.num_kv_heads), (seq.num_blocks_max_heads - 1) // 8] += seq.next_mask
+        if self.if_fake_compress:
+            seq.headwise_mask_layer[:, torch.arange(0, self.num_kv_heads), (seq.num_blocks_head - 1) // 8] += seq.next_mask.to(seq.headwise_mask_layer.device)
+        else:
+            seq.headwise_mask_layer[:, torch.arange(0, self.num_kv_heads), (seq.num_blocks_max_heads - 1) // 8] += seq.next_mask.to(seq.headwise_mask_layer.device)
+
         seq.next_mask = torch_rotl_uint8(seq.next_mask, 1)

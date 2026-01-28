@@ -8,6 +8,7 @@ import torch
 from ..sampling_params import SamplingParams
 
 def torch_rotl_uint8(x: torch.Tensor, k: int) -> torch.Tensor:
+    assert x.device.type == "cpu" 
     assert x.dtype is torch.uint8
     return ((x << k) | (x >> (8 - k))).to(torch.uint8)
 
@@ -41,14 +42,14 @@ class Sequence:
     
     def __init__(self):
         self.block_table: list[int] = []
-        self.headwise_mask_layer_transpose: torch.Tensor = torch.zeros((self.num_layers, self.num_kv_heads, 1), device="cuda", dtype=torch.uint8)
+        self.headwise_mask_layer: torch.Tensor = torch.zeros((self.num_layers, self.num_kv_heads, 1), device="cuda", dtype=torch.uint8)
         self.query_block_id: int = -1
         self.num_tokens: int = 0
         self.last_block_num_tokens: int = 1
         self.num_blocks_head: torch.Tensor = torch.zeros((self.num_kv_heads, ), device="cuda", dtype=torch.int32)
         self.num_prompt_tokens: int = 0
         self.num_cached_tokens: int = 0
-        self.next_mask = torch.ones((self.num_kv_heads,), device="cuda", dtype=torch.uint8)
+        self.next_mask = torch.ones((self.num_kv_heads,), device="cpu", dtype=torch.uint8)
         self.count_to_block_id = {i: [] for i in range(self.num_kv_heads)}
         self.block_id_to_count = {}
     
@@ -57,7 +58,7 @@ class Sequence:
         seq = cls()
         seq.seq_id = next(Sequence.cuda_graph_counter)
         seq.block_table = block_table
-        seq.headwise_mask_layer_transpose = torch.ones((cls.num_layers, cls.num_kv_heads, len(block_table)), device="cuda", dtype=torch.uint8)        
+        seq.headwise_mask_layer = torch.ones((cls.num_layers, cls.num_kv_heads, len(block_table)), device="cuda", dtype=torch.uint8)        
             
         seq.num_tokens = len(block_table) * cls.block_size
         seq.num_blocks_head = torch.ones((seq.num_kv_heads,), device="cuda", dtype=torch.int32) * len(block_table)
@@ -81,11 +82,11 @@ class Sequence:
         seq.num_cached_tokens = 0
         
         # seq.next_mask = torch_rotl_uint8(0b00000001, seq.num_tokens)
-        seq.next_mask = torch.ones((cls.num_kv_heads,), device="cuda", dtype=torch.uint8)
+        seq.next_mask = torch.ones((cls.num_kv_heads,), device="cpu", dtype=torch.uint8)
     
         
         seq.block_table = []
-        seq.headwise_mask_layer_transpose = torch.zeros((cls.num_layers, cls.num_kv_heads, 1), device="cuda", dtype=torch.uint8)
+        seq.headwise_mask_layer = torch.zeros((cls.num_layers, cls.num_kv_heads, 1), device="cuda", dtype=torch.uint8)
         seq.temperature = sampling_params.temperature
         seq.top_k = sampling_params.top_k
         seq.top_p = sampling_params.top_p

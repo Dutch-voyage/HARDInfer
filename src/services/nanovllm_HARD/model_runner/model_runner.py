@@ -22,12 +22,11 @@ from src.services.nanovllm_HARD.utils.context import set_cuda_graph_flag, init_p
 
 from src.artifacts.nanovllm_HARD.cache_mngr.headwise import CacheManager
 
+# NOTE should be deprecated
+# from src.artifacts.nanovllm_v8.cache_mngr.layerwise import CacheManager
 from src.artifacts.nanovllm_HARD.cache_mngr.nocompress import NoCompress
-from src.artifacts.nanovllm_HARD.cache_mngr.snapKV_revised_topp_rewrite import SnapKV
-from src.artifacts.nanovllm_HARD.cache_mngr.RKV_revised_topp_rewrite import RKV
 
 from src.artifacts.nanovllm_HARD.cache_mngr.vanilla_topp_rewrite import VanillaToppKV
-
 from src.services.nanovllm_HARD.model_runner.models.qwen3 import Qwen3AttentionArtifacts
 
 from src.services.nanovllm_HARD.utils.socket import is_port_in_use
@@ -85,12 +84,24 @@ class ModelRunner(BaseService):
         if self.config.compress_method == "none":
             self.compressor = NoCompress(config, window_size=config.query_window_size, budget=config.layer_budget)
         elif self.config.compress_method == "rkv":
+            if self.config.compress_method:
+                from artifacts.nanovllm_HARD.cache_mngr.RKV_topp import RKV
+            else:
+                from artifacts.nanovllm_HARD.cache_mngr.RKV_topp_rewrite import RKV
             self.compressor = RKV(config, window_size=config.query_window_size, budget=config.layer_budget, upper_budget=config.layer_upper_budget)
         elif self.config.compress_method == "snapkv":
+            if self.config.if_fake_compress:
+                from artifacts.nanovllm_HARD.cache_mngr.snapKV_topp import SnapKV
+            else:
+                from artifacts.nanovllm_HARD.cache_mngr.snapKV_topp_rewrite import SnapKV
             self.compressor = SnapKV(config, window_size=config.query_window_size, budget=config.layer_budget, upper_budget=config.layer_upper_budget)
         elif self.config.compress_method == "vanilla_topp": 
+            if self.config.if_fake_compress:
+                from src.artifacts.nanovllm_HARD.cache_mngr.vanilla_topp import VanillaToppKV
+            else:
+                from src.artifacts.nanovllm_HARD.cache_mngr.vanilla_topp_rewrite import VanillaToppKV
             self.compressor = VanillaToppKV(
-                config, window_size=config.query_window_size, budget=config.layer_budget
+                config, window_size=config.query_window_size, budget=config.layer_budget, upper_budget=config.layer_upper_budget
             )
         else:
             raise ValueError(f"Unknown compress method: {self.config.compress_method}")
@@ -98,14 +109,10 @@ class ModelRunner(BaseService):
         self.cache_mngr = CacheManager(self.attention_backend, config, self.compressor)
 
         self.cache_mngr._register_method("allocate_page_indices", self)
-        self.cache_mngr._register_method("allocate_page_indices_cudagraph", self)
         self.cache_mngr._register_method("read_and_store_cache", self)
         self.cache_mngr._register_method("update_indices", self)
         self.cache_mngr._register_method("update_indices_capture", self)
         self.cache_mngr._register_method("update_indices_replay", self)
-        # self.cache_mngr._register_obj("cu_seqs", self)
-        
-        # self.cu_seqs = []
         
         self.sampler = Sampler()
         global stage
@@ -252,6 +259,7 @@ class ModelRunner(BaseService):
                 and hasattr(module, "v_cache")
                 and hasattr(module, "q_cache")
             ):
+                # NOTE: here should handle multiple compression in prefill stage. 
                 # if len(self.cu_seqs[0].block_table) > self.config.layer_budget + self.config.steps_between_cache_compressions:
                 #     self.read_and_store_cache_iterative(
                 #         module.q_cache, module.k_cache, module.v_cache, module.layer_id
@@ -266,9 +274,6 @@ class ModelRunner(BaseService):
                 )
         self.cache_mngr.organize()
         
-        # self.trace_count += 1
-        # prof.export_chrome_trace(f"cpu_trace_{self.trace_count}.json")
-
     def save_compress_distribution(self, steps):
         save_path = os.path.join(self.config.log_path, f"compress_distribution_{steps}.pt")
         if not os.path.exists(self.config.log_path):
@@ -329,8 +334,7 @@ class ModelRunner(BaseService):
             config.num_kvcache_blocks, 
             num_kv_heads,
             self.block_size,
-            # num_kv_heads,
-            1, 
+            1, # num_kv_heads,
             hf_config.head_dim,
         )
 
@@ -434,11 +438,6 @@ class ModelRunner(BaseService):
             query_window_pos,
         )
         
-        # if not self.enforce_eager and stage != RunningStage.WARMUP:
-        #     # cuda_graph enabled
-        #     self.allocate_page_indices_cudagraph(seqs)
-        # else:
-        #     self.allocate_page_indices(seqs)
         self.allocate_page_indices(seqs)
         self.update_indices()
         return input_ids, positions
@@ -490,25 +489,13 @@ class ModelRunner(BaseService):
             query_slot_mapping=query_slot_mapping,
         )
 
-        # self.allocate_page_indices(seqs)
-        self.decode_time = 0
-        self.decode_time += 1
         self.allocate_page_indices(seqs)
         if not self.enforce_eager and stage != RunningStage.WARMUP:
-            # cuda_graph enabled
-            # self.allocate_page_indices_cudagraph(seqs)
             self.update_indices_replay(bs=len(seqs))
         else:
             
             self.update_indices()
         return input_ids, positions
-
-    # def prepare_sample(self, seqs: list[Sequence]):
-    #     temperatures = []
-    #     for seq in seqs:
-    #         temperatures.append(seq.temperature)
-    #     temperatures = torch.tensor(temperatures, dtype=torch.float32, pin_memory=True).cuda(non_blocking=True)
-    #     return temperatures
 
     def prepare_sample(self, seqs: list[Sequence]):
         return SamplingInfo.from_sequence(seqs)
@@ -540,7 +527,6 @@ class ModelRunner(BaseService):
         input_ids, positions = (
             self.prepare_prefill(seqs) if is_prefill else self.prepare_decode(seqs)
         )
-        # temperatures = self.prepare_sample(seqs) if self.rank == 0 else None
         sampling_infos = (
             self.prepare_sample(seqs).to(input_ids.device) if self.rank == 0 else None
         )
@@ -548,7 +534,9 @@ class ModelRunner(BaseService):
         token_ids = (
             self.sampler(logits, sampling_infos).tolist() if self.rank == 0 else None
         )
-        
+        # NOTE: don't known if there is potential bug in reset context, likely not
+        # reset_context()
+        # NOTE: you can pass logits for more detailed analysis
         # return ModelRunnerOutput(token_ids=token_ids, logits=logits)
         return ModelRunnerOutput(token_ids=token_ids, logits=None)
 
@@ -579,7 +567,6 @@ class ModelRunner(BaseService):
                 context_lens=context_lens[:bs],
                 query_slot_mapping=query_slot_mapping[:bs],
             )
-            # self.init_forward_metadata_capture_cuda_graph(bs, seq_lens[:bs], cu_page_indices)
             self.allocate_page_indices(seqs[:bs])
             set_context(
                 False,

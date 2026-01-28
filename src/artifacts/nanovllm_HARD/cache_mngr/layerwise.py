@@ -1,7 +1,7 @@
 from src.core.artifact_base import Artifact
 from src.core.service_base import BaseService
 
-from ..attention.flashinfer_attention_headflatten import (
+from ..attention.flashinfer_attention import (
     Attention,
     store_kvcache,
     read_kvcache,

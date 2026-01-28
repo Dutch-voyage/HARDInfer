@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from .utils import compute_attention_scores, update_log
-from .binary_search import binary_search_T_linear
+from .search import binary_search_T_linear
 
 from src.services.nanovllm_HARD.utils.logging import append_item_to_log
 
