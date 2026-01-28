@@ -21,7 +21,7 @@ import dataclasses
 
 from src.services.nanovllm_HARD.utils.context import get_cuda_graph_flag
 
-from artifacts.nanovllm_HARD.attention.flashinfer_attention import Attention
+from src.artifacts.nanovllm_HARD.attention.flashinfer_attention import Attention
 
 
 @dataclasses.dataclass
@@ -111,6 +111,7 @@ class Qwen3Attention(nn.Module, BaseService):
             hidden_size,
             bias=False,
         )
+        
         self.rotary_emb = get_rope(
             self.head_dim,
             rotary_dim=self.head_dim,
@@ -181,6 +182,7 @@ class Qwen3DecoderLayer(nn.Module):
     ) -> None:
         super().__init__()
         self.layer_id = layer_id
+
         self.self_attn = Qwen3Attention(
             layer_id, 
             attention_backend,
@@ -233,7 +235,6 @@ class Qwen3Model(nn.Module):
         self.embed_tokens = VocabParallelEmbedding(
             config.vocab_size, config.hidden_size
         )
-        
         
         self.layers = nn.ModuleList(
             [Qwen3DecoderLayer(layer_id, attention_backend, config) for layer_id in range(config.num_hidden_layers)]

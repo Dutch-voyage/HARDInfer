@@ -176,7 +176,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--local_dir", type=str, default="datasets")
     parser.add_argument("--data_source", type=str, default="aime24")
-    parser.add_argument("--model_path", type=str, default=f"{MODEL_PATH}/Qwen3-4B")
+    parser.add_argument("--model_path", type=str, default=f"{MODEL_PATH}/Qwen3-8B")
     parser.add_argument(
         "--compress_method", type=str, default="rkv", choices=["rkv", "snapkv", "vanilla"]
     )

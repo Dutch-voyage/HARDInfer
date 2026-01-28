@@ -85,15 +85,15 @@ class ModelRunner(BaseService):
             self.compressor = NoCompress(config, window_size=config.query_window_size, budget=config.layer_budget)
         elif self.config.compress_method == "rkv":
             if self.config.compress_method:
-                from artifacts.nanovllm_HARD.cache_mngr.RKV_topp import RKV
+                from src.artifacts.nanovllm_HARD.cache_mngr.RKV_topp import RKV
             else:
-                from artifacts.nanovllm_HARD.cache_mngr.RKV_topp_rewrite import RKV
+                from src.artifacts.nanovllm_HARD.cache_mngr.RKV_topp_rewrite import RKV
             self.compressor = RKV(config, window_size=config.query_window_size, budget=config.layer_budget, upper_budget=config.layer_upper_budget)
         elif self.config.compress_method == "snapkv":
             if self.config.if_fake_compress:
-                from artifacts.nanovllm_HARD.cache_mngr.snapKV_topp import SnapKV
+                from src.artifacts.nanovllm_HARD.cache_mngr.snapKV_topp import SnapKV
             else:
-                from artifacts.nanovllm_HARD.cache_mngr.snapKV_topp_rewrite import SnapKV
+                from src.artifacts.nanovllm_HARD.cache_mngr.snapKV_topp_rewrite import SnapKV
             self.compressor = SnapKV(config, window_size=config.query_window_size, budget=config.layer_budget, upper_budget=config.layer_upper_budget)
         elif self.config.compress_method == "vanilla_topp": 
             if self.config.if_fake_compress:

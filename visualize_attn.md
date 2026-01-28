@@ -20,7 +20,7 @@ python ./viz_tools/npz_to_json.py
 ## Step 3: Load the data
 
 
-Load the json data from the local files. Then Reset Camera for suitable view
+Load the json data from the local files (you can use the json data in ./demo_logs). Then Reset Camera for suitable view
 ![load](assets/viz_attn/snapshot2.png)
 
 ## Step 4: Choose the desired slice

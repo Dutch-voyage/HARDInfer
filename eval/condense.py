@@ -176,7 +176,7 @@ def main():
     parser.add_argument("--local_dir", type=str, default="datasets")
     parser.add_argument("--eval_path", type=str, default="sparse_results")
     parser.add_argument("--data_source", type=str, default="aime24")
-    parser.add_argument("--model_path", type=str, default=f"{MODEL_PATH}/Qwen3-4B")
+    parser.add_argument("--model_path", type=str, default=f"{MODEL_PATH}/Qwen3-8B")
     parser.add_argument("--enforce_eager", type=str_to_bool, default=False)
     parser.add_argument(
         "--compress_method", type=str, default="vanilla_topp", choices=["rkv", "snapkv", "vanilla_topp"]
