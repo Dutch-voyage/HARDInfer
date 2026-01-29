@@ -146,27 +146,27 @@ def load_statistics():
     source = DATA_SOURCE_CONFIG['source']
 
     if source == 'LS':
-        LS_stats = np.load('LS_stats.npy', allow_pickle=True).item()
+        LS_stats = np.load('LS_stats.npz', allow_pickle=True).item()
         stats_dict = {
             'LS_rewrite_prefill': LS_stats['LS_rewrite_prefill'],
             'LS_sparse_prefill': LS_stats['LS_sparse_prefill'],
             'LS_flatten_sum_prefill': LS_stats['LS_flatten_sum_prefill']
         }
     elif source == 'LA':
-        LA_stats = np.load('LA_stats.npy', allow_pickle=True).item()
+        LA_stats = np.load('LA_stats.npz', allow_pickle=True).item()
         stats_dict = {
             'LA_sparse_prefill': LA_stats['LA_sparse_prefill'],
             'LA_flatten_max_prefill': LA_stats['LA_flatten_max_prefill']
         }
     elif source == 'HS':
-        HS_stats = np.load('HS_stats.npy', allow_pickle=True).item()
+        HS_stats = np.load('HS_stats.npz', allow_pickle=True).item()
         stats_dict = {
             'HS_flatten_max_prefill': HS_stats['HS_flatten_max_prefill'],
             'HS_sparse_prefill': HS_stats['HS_sparse_prefill'],
             'HS_flatten_sum_prefill': HS_stats['HS_flatten_sum_prefill']
         }
     elif source == 'HA':
-        HA_stats = np.load('HA_stats.npy', allow_pickle=True).item()
+        HA_stats = np.load('HA_stats.npz', allow_pickle=True).item()
         stats_dict = {
             'HA_flatten_max_prefill': HA_stats['HA_flatten_max_prefill'],
             'HA_sparse_prefill': HA_stats['HA_sparse_prefill']

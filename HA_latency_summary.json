@@ -1,0 +1,38 @@
+{
+  "HA_backend_stats_0.5_0.25.npz": {
+    "HA_flatten_max_prefill": {
+      "preparation_time_avg_ms": 4.910538660486539,
+      "compute_time_avg_ms": 0.25326004453624285,
+      "compute_time_36_layers_ms": 9.117361603304742
+    },
+    "HA_sparse_prefill": {
+      "preparation_time_avg_ms": 0.5720032021403313,
+      "compute_time_avg_ms": 0.49942392628312254,
+      "compute_time_36_layers_ms": 17.979261346192413
+    }
+  },
+  "HA_backend_stats_0.5_0.125.npz": {
+    "HA_flatten_max_prefill": {
+      "preparation_time_avg_ms": 3.150844269990921,
+      "compute_time_avg_ms": 0.2532211702110039,
+      "compute_time_36_layers_ms": 9.11596212759614
+    },
+    "HA_sparse_prefill": {
+      "preparation_time_avg_ms": 0.56905707269907,
+      "compute_time_avg_ms": 0.4992400892311707,
+      "compute_time_36_layers_ms": 17.972643212322144
+    }
+  },
+  "HA_backend_stats_0.25_0.125.npz": {
+    "HA_flatten_max_prefill": {
+      "preparation_time_avg_ms": 3.1423386792341867,
+      "compute_time_avg_ms": 0.12922364432726882,
+      "compute_time_36_layers_ms": 4.652051195781677
+    },
+    "HA_sparse_prefill": {
+      "preparation_time_avg_ms": 0.5576938658952713,
+      "compute_time_avg_ms": 0.49846917055288537,
+      "compute_time_36_layers_ms": 17.944890139903872
+    }
+  }
+}

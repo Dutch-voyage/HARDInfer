@@ -14,4 +14,4 @@ uv run python ./viz/tasks_metrics.py
 ```
 
 Then you can get bar figures like this:
-![HS_task](figs/task_performance/HS_task_performance_32seqs.png)
+![HS_task](../../figs/task_performance/HS_task_performance_32seqs.png)

@@ -1163,7 +1163,7 @@ if __name__ == "__main__":
     )
 
     np.save(
-        "LS_stats.npy",
+        "LS_stats.npz",
         {
             "LS_flatten_sum_prefill": LS_flatten_sum_stats,
             "LS_rewrite_prefill": LS_rewrite_stats,
@@ -1172,7 +1172,7 @@ if __name__ == "__main__":
     )
 
     np.save(
-        "LA_stats.npy",
+        "LA_stats.npz",
         {
             "LA_flatten_max_prefill": LA_flatten_max_stats,
             "LA_sparse_prefill": LA_sparse_stats,
@@ -1180,7 +1180,7 @@ if __name__ == "__main__":
     )
 
     np.save(
-        "HS_stats.npy",
+        "HS_stats.npz",
         {
             "HS_flatten_max_prefill": HS_flatten_max_stats,
             "HS_flatten_sum_prefill": HS_flatten_sum_stats,
@@ -1189,7 +1189,7 @@ if __name__ == "__main__":
     )
 
     np.save(
-        "HA_stats.npy",
+        "HA_stats.npz",
         {
             "HA_flatten_max_prefill": HA_flatten_max_stats,
             "HA_sparse_prefill": HA_sparse_stats,

@@ -282,7 +282,7 @@ class Attetnion:
 class Config:
     model: str
     enforce_eager: bool = False # False mean CUDA Graph is enabled
-    query_window_size: int = 128 # query local window cache size
+    query_window_size: int = 128 # local query window cache size
     layer_budget: int = 1024
     layer_upper_budget: int = 2048
     

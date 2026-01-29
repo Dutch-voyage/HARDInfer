@@ -50,6 +50,30 @@ DATA_PATH=(path to you datasets)
 
 and run `export UV_ENV_FILE=.env`
 
+Note: 
+
+The following configurations are key to performances and implementations:
+
+```python
+# Extended configuration for HARD
+class Config:
+    model: str
+    enforce_eager: bool = False # False mean CUDA Graph is enabled
+    layer_budget: int = 1024  # in scripts, the layer_budget is by default 1/2 of layer_upper_budget 
+    layer_upper_budget: int = 2048 # in scripts, the layer_upper_budget is the true threshold,  
+    
+    compress_method: str = "snapkv" # in {"snapkv", "rkv", "vanilla_topp"}
+    
+    if_compress_kvcache: bool = True # set to False when no Cache Mangager-related functions will be triggered
+    if_fake_compress: bool = True # set to False when no rewrite operation (condense cache) is needed
+
+    p_attn: float = 0.90 # use in top p selection
+
+    query_window_size: int = 32 # local query window cache size
+    steps_between_cache_compressions: int = 128 # steps between compression operations
+```
+
+
 ## Full Experiments
 
 We provide simple scripts in ./scripts. The results are main produced by `./eval/baseline` (nanovllm_base) for naive top-k allocation and by `./eval/condense` (nanovllm_HARD) for our implementations. 
