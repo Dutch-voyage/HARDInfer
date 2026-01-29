@@ -15,6 +15,17 @@ This is the code repo for implementing paper **HARD-KV: Head-Adaptive Regulariza
 For further details, please refer to [docs/architecture.md](docs/architecture.md)
 
 ![framework](assets/frame_all.drawio.png)
+## Code Structure
+```
+src/artifacts                 # Plugins & Components
+├── nanovllm_base/            # Baseline implementation (fixed budget for all layers)
+└── nanovllm_HARD/            # Hard-KV implementation (dynammic budget across heads)
+
+src/services                  # System & Workflow
+├── nanovllm/                 # Original nano-vllm
+├── nanovllm_base/            # Baseline implementation 
+└── nanovllm_HARD/            # Hard-KV implementation 
+```
 ## Quick Start 
 
 We recommand to set up environments with uv. 
@@ -74,5 +85,7 @@ Feel free to try with different models and methods, or even contribute custome v
 | | **+ Ours** | **24.1%** | **24346.1** | **52.0%** | **24748.5** | **50.3%** | **21296.5** |
 
 ## Visualiation Guides
+
+We aim to provide **reprouction** guides not only constrained to our experiment results but also with **visualizations**.
 
 see [docs/viz/visualize_guides.md](docs/viz/visualize_guides.md)
